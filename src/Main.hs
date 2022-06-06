@@ -1,22 +1,27 @@
-type Prog = [Func]
+type Prog = [Func] 
 
-data Type = IntType | BoolType
+data Type = 
+    IntType 
+  | BoolType 
+  deriving (Show)
 
 data Func = Func 
   { name        ::  String
   , funcArgs    ::  Maybe [Arg] 
   , funcType    ::  Maybe Type
   , instrs      ::  [Instr]
-  }
+  } 
+  deriving Show
  
-type Arg = [(String,Type)]
+type Arg = [(String,Type)] 
 
 data Instr = Instr
   { op        ::  Op
   , dest      ::  Maybe String
   , instrArgs ::  Maybe [String]
   , funcs     ::  Maybe [String]
-  , labels    ::  Maybe [String] }
+  , labels    ::  Maybe [String] } 
+  deriving Show
 
 data Op = 
     Add
@@ -34,7 +39,7 @@ data Op =
   | Jmp
   | Br
   | Call
-  | Ret
+  | Ret deriving Show
 
 
 main :: IO ()
