@@ -7,19 +7,11 @@ import Data.Text
 
 newtype Prog = Prog [Func]
   deriving (Show, Generic)
-instance FromJSON Prog where
-  parseJSON = withObject "Prog" $ \v ->
-    Prog <$> v .: "functions"
 
 data Type = 
     IntType 
   | BoolType 
   deriving (Show)
-instance FromJSON Type where
-  parseJSON (String s) = pure $ 
-    case s of
-      "int"   -> IntType
-      "bool"  -> BoolType
 
 data Func = Func 
   { name        ::  Text
@@ -27,11 +19,6 @@ data Func = Func
   , instrs      ::  [Instr]
   } 
   deriving Show
-instance FromJSON Func where
-  parseJSON = withObject "Func" $ \v ->
-    Func  <$> v .:  "name"
-          <*> v .:? "type"
-          <*> v .:  "instrs"
 
 data Instr = Instr
   { op        ::  Op
@@ -40,13 +27,6 @@ data Instr = Instr
   , funcs     ::  Maybe [Text]
   , labels    ::  Maybe [Text] } 
   deriving Show
-instance FromJSON Instr where
-  parseJSON = withObject "Instr" $ \v -> 
-    Instr <$> v .:  "op" 
-          <*> v .:? "dest"
-          <*> v .:? "args"
-          <*> v .:? "funcs"
-          <*> v .:? "labels"
     
 data Op = 
     Add
@@ -68,6 +48,31 @@ data Op =
   | Const
   | Print
   deriving Show
+
+instance FromJSON Prog where
+  parseJSON = withObject "Prog" $ \v ->
+    Prog <$> v .: "functions"
+
+instance FromJSON Type where
+  parseJSON (String s) = pure $ 
+    case s of
+      "int"   -> IntType
+      "bool"  -> BoolType
+
+instance FromJSON Func where
+  parseJSON = withObject "Func" $ \v ->
+    Func  <$> v .:  "name"
+          <*> v .:? "type"
+          <*> v .:  "instrs"
+
+instance FromJSON Instr where
+  parseJSON = withObject "Instr" $ \v -> 
+    Instr <$> v .:  "op" 
+          <*> v .:? "dest"
+          <*> v .:? "args"
+          <*> v .:? "funcs"
+          <*> v .:? "labels"
+
 instance FromJSON Op where
   parseJSON (String s) = pure $ case s of
     "add" -> Add
