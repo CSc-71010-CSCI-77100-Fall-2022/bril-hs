@@ -1,25 +1,37 @@
 {-# LANGUAGE DeriveGeneric #-}
+{-# LANGUAGE OverloadedStrings #-}
 
 import Data.Aeson
 import GHC.Generics
 import Data.Text
 
-type Prog = [Func] 
+newtype Prog = Prog [Func]
+  deriving (Show, Generic)
+instance FromJSON Prog where
+  parseJSON = withObject "Prog" $ \v ->
+    Prog <$> v .: "functions"
 
 data Type = 
     IntType 
   | BoolType 
   deriving (Show)
+instance FromJSON Type where
+  parseJSON (String s) = pure $ 
+    case s of
+      "int"   -> IntType
+      "bool"  -> BoolType
 
 data Func = Func 
   { name        ::  Text
-  , funcArgs    ::  Maybe [Arg] 
   , funcType    ::  Maybe Type
   , instrs      ::  [Instr]
   } 
   deriving Show
- 
-type Arg = [(Text,Type)] 
+instance FromJSON Func where
+  parseJSON = withObject "Func" $ \v ->
+    Func  <$> v .:  "name"
+          <*> v .:? "type"
+          <*> v .:  "instrs"
 
 data Instr = Instr
   { op        ::  Op
@@ -28,7 +40,14 @@ data Instr = Instr
   , funcs     ::  Maybe [Text]
   , labels    ::  Maybe [Text] } 
   deriving Show
-
+instance FromJSON Instr where
+  parseJSON = withObject "Instr" $ \v -> 
+    Instr <$> v .:  "op" 
+          <*> v .:? "dest"
+          <*> v .:? "args"
+          <*> v .:? "funcs"
+          <*> v .:? "labels"
+    
 data Op = 
     Add
   | Mul
@@ -46,9 +65,29 @@ data Op =
   | Br
   | Call
   | Ret 
-  deriving (Show, Generic)
-instance FromJSON Op
-instance ToJSON Op
+  | Const
+  | Print
+  deriving Show
+instance FromJSON Op where
+  parseJSON (String s) = pure $ case s of
+    "add" -> Add
+    "mul" -> Mul
+    "sub" -> Sub
+    "div" -> Div
+    "eq"  -> Eq
+    "lt"  -> Lt
+    "gt"  -> Gt
+    "le"  -> Le
+    "ge"  -> Ge
+    "not" -> Not
+    "and" -> And
+    "or"  -> Or
+    "jmp" -> Jmp
+    "br"  -> Br
+    "call" -> Call
+    "ret" -> Ret
+    "const" -> Const
+    "print" -> Print
 
 main :: IO ()
 main = do
