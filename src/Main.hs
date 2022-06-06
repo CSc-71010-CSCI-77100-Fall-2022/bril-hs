@@ -1,3 +1,9 @@
+{-# LANGUAGE DeriveGeneric #-}
+
+import Data.Aeson
+import GHC.Generics
+import Data.Text
+
 type Prog = [Func] 
 
 data Type = 
@@ -6,21 +12,21 @@ data Type =
   deriving (Show)
 
 data Func = Func 
-  { name        ::  String
+  { name        ::  Text
   , funcArgs    ::  Maybe [Arg] 
   , funcType    ::  Maybe Type
   , instrs      ::  [Instr]
   } 
   deriving Show
  
-type Arg = [(String,Type)] 
+type Arg = [(Text,Type)] 
 
 data Instr = Instr
   { op        ::  Op
-  , dest      ::  Maybe String
-  , instrArgs ::  Maybe [String]
-  , funcs     ::  Maybe [String]
-  , labels    ::  Maybe [String] } 
+  , dest      ::  Maybe Text
+  , instrArgs ::  Maybe [Text]
+  , funcs     ::  Maybe [Text]
+  , labels    ::  Maybe [Text] } 
   deriving Show
 
 data Op = 
@@ -39,8 +45,10 @@ data Op =
   | Jmp
   | Br
   | Call
-  | Ret deriving Show
-
+  | Ret 
+  deriving (Show, Generic)
+instance FromJSON Op
+instance ToJSON Op
 
 main :: IO ()
 main = do
