@@ -1,12 +1,12 @@
-{-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE OverloadedStrings #-}
 
 import Data.Aeson
 import GHC.Generics
 import Data.Text
+import Data.ByteString.Lazy as BS
 
 newtype Prog = Prog [Func]
-  deriving (Show, Generic)
+  deriving Show
 
 data Type = 
     IntType 
@@ -96,4 +96,12 @@ instance FromJSON Op where
 
 main :: IO ()
 main = do
-  putStrLn "hello world"
+  s <- BS.readFile "add.json"
+  let prog = decode s :: Maybe Prog
+  print prog
+
+
+
+
+
+
