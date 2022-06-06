@@ -1,4 +1,4 @@
-type Prog = [String]
+type Prog = [Func]
 
 data Type = IntType | BoolType
 
