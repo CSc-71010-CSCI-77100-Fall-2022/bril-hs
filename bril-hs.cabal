@@ -21,3 +21,4 @@ executable bril-hs
                      , aeson 
                      , text
                      , bytestring
+                     , scientific

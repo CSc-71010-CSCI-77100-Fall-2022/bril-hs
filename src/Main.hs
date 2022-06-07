@@ -1,10 +1,13 @@
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE DeriveGeneric #-}
 
 import Data.Aeson
 import GHC.Generics
 import Data.Text
+import Data.Scientific
 import Data.ByteString.Lazy as BS
 
+{-- BRIL Program Types --}
 newtype Prog = Prog [Func]
   deriving Show
 
@@ -25,9 +28,11 @@ data Instr = Instr
   , dest      ::  Maybe Text
   , instrArgs ::  Maybe [Text]
   , funcs     ::  Maybe [Text]
-  , labels    ::  Maybe [Text] } 
+  , labels    ::  Maybe [Text]
+  , value     ::  Maybe InstrVal
+  }
   deriving Show
-    
+  
 data Op = 
     Add
   | Mul
@@ -53,17 +58,29 @@ instance FromJSON Prog where
   parseJSON = withObject "Prog" $ \v ->
     Prog <$> v .: "functions"
 
+instance ToJSON Prog where
+  toJSON (Prog x) = object [ "functions" .= x ]
+
 instance FromJSON Type where
   parseJSON (String s) = pure $ 
     case s of
       "int"   -> IntType
       "bool"  -> BoolType
 
+instance ToJSON Type where 
+  toJSON IntType = "int"
+  toJSON BoolType = "bool"
+
 instance FromJSON Func where
   parseJSON = withObject "Func" $ \v ->
     Func  <$> v .:  "name"
           <*> v .:? "type"
           <*> v .:  "instrs"
+
+instance ToJSON Func where
+  toJSON (Func name funcType instrs) = object [ "name"    .= name, 
+                                                "type"    .= funcType,
+                                                "instrs"  .= instrs ]
 
 instance FromJSON Instr where
   parseJSON = withObject "Instr" $ \v -> 
@@ -72,6 +89,27 @@ instance FromJSON Instr where
           <*> v .:? "args"
           <*> v .:? "funcs"
           <*> v .:? "labels"
+          <*> v .:? "value"
+
+data InstrVal = BoolVal Bool | IntVal Integer deriving Show
+instance FromJSON InstrVal where
+  parseJSON (Number x) = return $ IntVal (coefficient x)
+  parseJSON (Bool x)   = return $ BoolVal x
+
+instance ToJSON InstrVal where
+  toJSON (BoolVal True) = Bool True
+  toJSON (BoolVal False) = Bool False
+  toJSON (IntVal n) = Number (fromInteger n)
+
+instance ToJSON Instr where
+  toJSON (Instr op dest instrArgs funcs labels value) = 
+    object [ "op"     .= op,
+             "dest"   .= dest,
+             "args"   .= instrArgs,
+             "funcs"  .= funcs,
+             "labels" .= labels,
+             "value"  .= value
+            ]
 
 instance FromJSON Op where
   parseJSON (String s) = pure $ case s of
@@ -94,12 +132,33 @@ instance FromJSON Op where
     "const" -> Const
     "print" -> Print
 
+instance ToJSON Op where
+  toJSON Add = "add"
+  toJSON Mul = "mul"
+  toJSON Sub = "sub"
+  toJSON Div = "div"
+  toJSON Eq  = "eq"
+  toJSON Lt  = "lt"
+  toJSON Gt  = "gt"
+  toJSON Le  = "le"
+  toJSON Ge  = "ge"
+  toJSON Not = "not"
+  toJSON And = "and"
+  toJSON Or  = "or"
+  toJSON Jmp = "jmp"
+  toJSON Br  = "br"
+  toJSON Call = "call"
+  toJSON Ret = "ret"
+  toJSON Const = "const"
+  toJSON Print = "print"
+
 main :: IO ()
 main = do
   s <- BS.readFile "add.json"
   let prog = decode s :: Maybe Prog
   print prog
-
+  let e = encode prog
+  BS.writeFile "output.json" e 
 
 
 
