@@ -3,18 +3,33 @@ module Main where
 import Bril
 import Data.Aeson
 import GHC.Generics
-import Data.Text
+import qualified Data.Text as T
 import Data.Scientific
 import System.IO
-import Data.ByteString.Lazy as BS
+import qualified Data.ByteString.Lazy as BS
+
+
+terminators :: [Op]
+terminators = [Jmp, Br, Ret]
+
+formBlocks :: [Instr] -> [[Instr]]
+formBlocks instrs = reverse $ formBlocks' instrs [] [] 
+
+formBlocks' :: [Instr] -> [[Instr]] -> [Instr] -> [[Instr]]
+formBlocks' [] blocks block = if    block == [] 
+                              then  blocks 
+                              else  (reverse block):blocks
 
 main :: IO ()
 main = do
   s <- BS.hGetContents stdin
-  let prog = decode s :: Maybe Prog
-  print prog
+  let eitherProg = eitherDecode s :: Either String Prog
+  let prog = case eitherProg of
+                    Left err -> error err
+                    Right p -> p
+  let blocks = formBlocks $ instrs $ head $ funcs prog
   let e = encode prog
-  BS.writeFile "output.json" e 
+  BS.putStr e 
 
 
 

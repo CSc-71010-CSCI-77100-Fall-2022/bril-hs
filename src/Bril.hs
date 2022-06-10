@@ -10,13 +10,14 @@ import Data.ByteString.Lazy as BS
 
 
 {-- BRIL Program Types --}
-newtype Prog = Prog [Func]
+newtype Prog = Prog
+  { funcs :: [Func] }
   deriving Show
 
 data Type = 
     IntType 
   | BoolType 
-  deriving (Show)
+  deriving Show
 
 data Func = Func 
   { name        ::  Text
@@ -26,16 +27,17 @@ data Func = Func
   deriving Show
 
 data Instr = Instr
-  { op        ::  Op
+  { op        ::  Maybe Op
   , dest      ::  Maybe Text
   , instrArgs ::  Maybe [Text]
-  , funcs     ::  Maybe [Text]
+  , funcIds   ::  Maybe [Text]
   , labels    ::  Maybe [Text]
   , value     ::  Maybe InstrVal
   }
-  deriving Show
+  deriving (Eq, Show)
 
-data InstrVal = BoolVal Bool | IntVal Integer deriving Show
+data InstrVal = BoolVal Bool | IntVal Integer 
+  deriving (Eq, Show)
   
 data Op = 
     Add
@@ -56,7 +58,7 @@ data Op =
   | Ret 
   | Const
   | Print
-  deriving Show
+  deriving (Eq, Show)
 
 {-- BRIL JSON Parsers --}
 instance FromJSON Prog where
@@ -89,7 +91,7 @@ instance ToJSON Func where
 
 instance FromJSON Instr where
   parseJSON = withObject "Instr" $ \v -> 
-    Instr <$> v .:  "op" 
+    Instr <$> v .:? "op" 
           <*> v .:? "dest"
           <*> v .:? "args"
           <*> v .:? "funcs"
@@ -97,11 +99,11 @@ instance FromJSON Instr where
           <*> v .:? "value"
 
 instance ToJSON Instr where
-  toJSON (Instr op dest instrArgs funcs labels value) = 
+  toJSON (Instr op dest instrArgs funcIds labels value) = 
     object [ "op"     .= op,
              "dest"   .= dest,
              "args"   .= instrArgs,
-             "funcs"  .= funcs,
+             "funcs"  .= funcIds,
              "labels" .= labels,
              "value"  .= value
             ]
