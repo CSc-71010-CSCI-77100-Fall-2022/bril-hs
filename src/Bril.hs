@@ -8,11 +8,9 @@ import Data.Scientific
 import System.IO
 import Data.ByteString.Lazy as BS
 
-
 {-- BRIL Program Types --}
 newtype Prog = Prog
   { funcs :: [Func] }
-  deriving Show
 
 data Type = 
     IntType 
@@ -24,7 +22,6 @@ data Func = Func
   , funcType    ::  Maybe Type
   , instrs      ::  [Instr]
   } 
-  deriving Show
 
 data Instr = Instr
   { op        ::  Maybe Op
@@ -32,6 +29,7 @@ data Instr = Instr
   , instrArgs ::  Maybe [Text]
   , funcIds   ::  Maybe [Text]
   , labels    ::  Maybe [Text]
+  , label     ::  Maybe Text
   , value     ::  Maybe InstrVal
   }
   deriving (Eq, Show)
@@ -68,6 +66,11 @@ instance FromJSON Prog where
 instance ToJSON Prog where
   toJSON (Prog x) = object [ "functions" .= x ]
 
+instance Show Prog where
+  show f = case funcs f of
+             f:fs -> show f ++ "\n" ++ (show $ Prog {funcs=fs})
+             [] -> ""
+
 instance FromJSON Type where
   parseJSON (String s) = pure $ 
     case s of
@@ -89,6 +92,14 @@ instance ToJSON Func where
                                                 "type"    .= funcType,
                                                 "instrs"  .= instrs ]
 
+instance Show Func where
+  show f =  let is = showInstrHelper (instrs f) in 
+                "Function name: " ++ (show $ name f) 
+            ++  "\n" 
+            ++  "Function type: " ++ (show $ funcType f) 
+            ++ "\n" 
+            ++ "Instructions: " ++ is
+
 instance FromJSON Instr where
   parseJSON = withObject "Instr" $ \v -> 
     Instr <$> v .:? "op" 
@@ -96,17 +107,23 @@ instance FromJSON Instr where
           <*> v .:? "args"
           <*> v .:? "funcs"
           <*> v .:? "labels"
+          <*> v .:? "label"
           <*> v .:? "value"
 
 instance ToJSON Instr where
-  toJSON (Instr op dest instrArgs funcIds labels value) = 
+  toJSON (Instr op dest instrArgs funcIds labels label value) = 
     object [ "op"     .= op,
              "dest"   .= dest,
              "args"   .= instrArgs,
              "funcs"  .= funcIds,
              "labels" .= labels,
+             "label"  .= label,
              "value"  .= value
             ]
+
+showInstrHelper :: [Instr] -> String
+showInstrHelper (i:is) = "  " ++ show i ++ "\n" ++ showInstrHelper is
+showInstrHelper [] = ""
 
 instance FromJSON InstrVal where
   parseJSON (Number x) = return $ IntVal (coefficient x)
