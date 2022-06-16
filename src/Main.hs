@@ -1,17 +1,33 @@
+{-# LANGUAGE OverloadedStrings #-}
 module Main where
 
 import Bril
-import Data.Aeson
-import GHC.Generics
-import qualified Data.Text as T
-import Data.Scientific
-import Data.Maybe
+import Data.Aeson (eitherDecode, encode)
+import Data.Map (Map)
+import Data.Maybe (fromJust)
+import Data.Monoid
 import System.IO
-import qualified Data.ByteString.Lazy as BS
+import qualified Data.Text as T
 
+import qualified Data.ByteString.Lazy as BS
+import qualified Data.Map as Map
 
 type Block  = [Instr]
 type Blocks = [Block]
+
+getBlockMap :: Blocks -> Map T.Text Block
+getBlockMap blocks = 
+  let emptyMap = Map.empty in
+  getBlockMap' blocks emptyMap 0
+
+getBlockMap' [] map _ = map
+getBlockMap' (block:blocks) map nextId = 
+  case label $ head block of
+    Nothing ->  let id = T.pack $ show nextId in
+                let map' = Map.insert ("block" `mappend` id) block map in 
+                getBlockMap' blocks map' (nextId+1) 
+    Just id ->  let map' = Map.insert id (tail block) map in
+                getBlockMap' blocks map' nextId
 
 showBlockHelper :: Blocks -> String
 showBlockHelper (b:bs) = showInstrHelper b ++ "\n" ++ showBlockHelper bs
@@ -57,6 +73,7 @@ main = do
                     Right p -> p
   let blocks = formBlocks $ instrs $ head $ funcs prog
   putStr $ showBlockHelper blocks
+  putStrLn $ show $ getBlockMap blocks
   let e = encode prog
   BS.putStrLn e 
 

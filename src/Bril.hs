@@ -1,10 +1,8 @@
 {-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE DeriveGeneric #-}
 module Bril where
 import Data.Aeson
-import GHC.Generics
 import Data.Text
-import Data.Scientific
+import Data.Scientific (coefficient)
 import System.IO
 import Data.ByteString.Lazy as BS
 

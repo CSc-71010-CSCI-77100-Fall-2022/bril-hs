@@ -32,3 +32,4 @@ executable bril-hs
                      , text
                      , bytestring
                      , scientific
+                     , containers
