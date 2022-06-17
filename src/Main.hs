@@ -15,6 +15,33 @@ import qualified Data.Map as Map
 type Block  = [Instr]
 type Blocks = [Block]
 
+type Cfg = Map T.Text [T.Text]
+
+getCfg :: Map T.Text Block -> Cfg
+getCfg blockMap = 
+  let lst = Map.toList blockMap 
+      emptyMap = Map.empty in
+  getCfg' lst emptyMap
+
+getCfg' :: [(T.Text, Block)] -> Cfg -> Cfg
+getCfg' [] cfg = cfg
+getCfg' ((name, block):tl) cfg = 
+  let lastInstr = head $ reverse block in
+  case op lastInstr  of
+    c
+      | c `elem` [Just Jmp, Just Br] -> 
+          let Just keys = labels lastInstr 
+              locs = Map.findWithDefault [] name cfg in
+              getCfg' tl (Map.insert name (locs <> keys) cfg)
+
+      | c == Just Ret ->
+          getCfg' tl (Map.insert name [] cfg)
+      | otherwise -> 
+          case tl of
+            [] -> getCfg' tl (Map.insert name [] cfg)
+            (succ,_):_ -> let locs = Map.findWithDefault [] name cfg in
+                              getCfg' tl (Map.insert name (locs <> [succ]) cfg)
+
 getBlockMap :: Blocks -> Map T.Text Block
 getBlockMap blocks = 
   let emptyMap = Map.empty in
@@ -72,8 +99,8 @@ main = do
                     Left err -> error err
                     Right p -> p
   let blocks = formBlocks $ instrs $ head $ funcs prog
-  putStr $ showBlockHelper blocks
-  putStrLn $ show $ getBlockMap blocks
+  let blockMap = getBlockMap blocks
+  let cfg = getCfg blockMap
   let e = encode prog
   BS.putStrLn e 
 
