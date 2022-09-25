@@ -12,8 +12,8 @@ import qualified Data.Text as T
 import qualified Data.ByteString.Lazy as BS
 import qualified Data.Map as Map
 
-type Block  = [Instr]
-type Blocks = [Block]
+type Block  = [Instr] 
+type Blocks = [Block] 
 
 type Cfg = Map T.Text [T.Text]
 
@@ -101,8 +101,11 @@ main = do
   let blocks = formBlocks $ instrs $ head $ funcs prog
   let blockMap = getBlockMap blocks
   let cfg = getCfg blockMap
-  let e = encode prog
-  BS.putStrLn e 
+  putStrLn $ show cfg
+  putStrLn ""
+  putStrLn $ show blockMap
+  --let e = encode prog
+  --BS.putStrLn e 
 
 
 
