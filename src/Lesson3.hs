@@ -1,5 +1,5 @@
 {-# LANGUAGE OverloadedStrings #-}
-module Main where
+module Lesson3 where
 
 import Bril
 import Cfg
@@ -18,11 +18,7 @@ main = do
   let blocks = formBlocks $ instrs $ head $ funcs prog
   let blockMap = getBlockMap blocks
   let cfg = getCfg blockMap
-  putStrLn $ show cfg
-  putStrLn ""
-  putStrLn $ show blockMap
-  --let e = encode prog
-  --BS.putStrLn e 
+  
 
 
 

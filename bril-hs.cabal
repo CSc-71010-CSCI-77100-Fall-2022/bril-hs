@@ -26,11 +26,25 @@ library
 
 executable lesson2
   hs-source-dirs:      src
-  main-is:             Main.hs
+  main-is:             Lesson2.hs
   default-language:    Haskell2010
+  ghc-options:         -main-is Lesson2
   build-depends:       base >= 4.7 && < 5
                      , aeson 
                      , text
                      , bytestring
                      , scientific
                      , containers
+
+executable lesson3
+  hs-source-dirs:      src
+  main-is:             Lesson3.hs
+  default-language:    Haskell2010
+  ghc-options:         -main-is Lesson3
+  build-depends:       base >= 4.7 && < 5
+                     , aeson 
+                     , text
+                     , bytestring
+                     , scientific
+                     , containers
+
