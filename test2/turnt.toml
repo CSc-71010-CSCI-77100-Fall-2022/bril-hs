@@ -1,1 +1,1 @@
-command = "bril2json < {filename} | stack run bril-hs"
+command = "bril2json < {filename} | stack run lesson2"
