@@ -1,0 +1,3 @@
+fromList [("block0",[])]
+
+fromList [("block0",[Instr {op = Just Const, dest = Just "v", instrArgs = Nothing, funcIds = Nothing, labels = Nothing, label = Nothing, value = Just (IntVal 5)},Instr {op = Just Print, dest = Nothing, instrArgs = Just ["v"], funcIds = Nothing, labels = Nothing, label = Nothing, value = Nothing}])]
