@@ -6,6 +6,8 @@ import Data.Scientific (coefficient)
 import System.IO
 import Data.ByteString.Lazy as BS
 
+stripNulls xs = Prelude.filter (\(_,v) -> v /= Null) xs
+
 {-- BRIL Program Types --}
 newtype Prog = Prog
   { funcs :: [Func] }
@@ -62,7 +64,7 @@ instance FromJSON Prog where
     Prog <$> v .: "functions"
 
 instance ToJSON Prog where
-  toJSON (Prog x) = object [ "functions" .= x ]
+  toJSON (Prog x) = object $ stripNulls [ "functions" .= x ]
 
 instance Show Prog where
   show f = case funcs f of
@@ -86,7 +88,7 @@ instance FromJSON Func where
           <*> v .:  "instrs"
 
 instance ToJSON Func where
-  toJSON (Func name funcType instrs) = object [ "name"    .= name, 
+  toJSON (Func name funcType instrs) = object $ stripNulls [ "name"    .= name, 
                                                 "type"    .= funcType,
                                                 "instrs"  .= instrs ]
 
@@ -110,7 +112,7 @@ instance FromJSON Instr where
 
 instance ToJSON Instr where
   toJSON (Instr op dest instrArgs funcIds labels label value) = 
-    object [ "op"     .= op,
+    object $ stripNulls [ "op"     .= op,
              "dest"   .= dest,
              "args"   .= instrArgs,
              "funcs"  .= funcIds,
