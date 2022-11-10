@@ -15,7 +15,7 @@ newtype Prog = Prog
 data Type = 
     IntType 
   | BoolType 
-  deriving Show
+  deriving (Eq, Show)
 
 data Func = Func 
   { name        ::  Text
@@ -31,6 +31,7 @@ data Instr = Instr
   , labels    ::  Maybe [Text]
   , label     ::  Maybe Text
   , value     ::  Maybe InstrVal
+  , instrType      ::  Maybe Type
   }
   deriving (Eq, Show)
 
@@ -109,16 +110,18 @@ instance FromJSON Instr where
           <*> v .:? "labels"
           <*> v .:? "label"
           <*> v .:? "value"
+          <*> v .:? "type"
 
 instance ToJSON Instr where
-  toJSON (Instr op dest instrArgs funcIds labels label value) = 
+  toJSON (Instr op dest instrArgs funcIds labels label value instrType) = 
     object $ stripNulls [ "op"     .= op,
              "dest"   .= dest,
              "args"   .= instrArgs,
              "funcs"  .= funcIds,
              "labels" .= labels,
              "label"  .= label,
-             "value"  .= value
+             "value"  .= value,
+             "type"   .= instrType
             ]
 
 showInstrHelper :: [Instr] -> String
