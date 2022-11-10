@@ -7,7 +7,6 @@ import Cfg
 import Data.Aeson (eitherDecode, encode)
 import qualified Data.ByteString.Lazy as BS
 import System.IO
---import Data.Set (Set)
 import qualified Data.Set as S
 import qualified Data.Text as T
 import Data.Map (Map)
@@ -24,10 +23,10 @@ main = do
                     Right p -> p
   let instrs' = instrs $ head $ funcs prog
   let instrs'' = removeDeadCode instrs'
-  let instrs''' = removeUnusedDef instrs''
+  let instrs''' = concat $ removeUnusedDef <$> Cfg.formBlocks instrs''
   --let blocks = formBlocks $ instrs $ head $ funcs prog
   let e = encode $ Prog {funcs = 
-      [Func {name = "main", funcType = Nothing, instrs = instrs'''}]}
+      [Func {name = "main", funcType = (Nothing), instrs = instrs''', args = args $ head $ funcs prog}]}
   BS.putStrLn e
 
 -- trivial dead code no. 2:

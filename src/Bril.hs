@@ -21,7 +21,14 @@ data Func = Func
   { name        ::  Text
   , funcType    ::  Maybe Type
   , instrs      ::  [Instr]
+  , args        ::  Maybe [Arg]
   } 
+
+data Arg = Arg
+  { argName   ::  Text
+  , argType   ::  Type
+  }
+  deriving (Eq, Show)
 
 data Instr = Instr
   { op        ::  Maybe Op
@@ -57,6 +64,7 @@ data Op =
   | Ret 
   | Const
   | Print
+  | Id
   deriving (Eq, Show)
 
 {-- BRIL JSON Parsers --}
@@ -66,11 +74,6 @@ instance FromJSON Prog where
 
 instance ToJSON Prog where
   toJSON (Prog x) = object $ stripNulls [ "functions" .= x ]
-
-instance Show Prog where
-  show f = case funcs f of
-             f:fs -> show f ++ "\n" ++ (show $ Prog {funcs=fs})
-             [] -> ""
 
 instance FromJSON Type where
   parseJSON (String s) = pure $ 
@@ -87,19 +90,25 @@ instance FromJSON Func where
     Func  <$> v .:  "name"
           <*> v .:? "type"
           <*> v .:  "instrs"
+          <*> v .:? "args"
 
 instance ToJSON Func where
-  toJSON (Func name funcType instrs) = object $ stripNulls [ "name"    .= name, 
+  toJSON (Func name funcType instrs args) = object $ stripNulls [ "name"    .= name, 
                                                 "type"    .= funcType,
-                                                "instrs"  .= instrs ]
+                                                "instrs"  .= instrs,
+                                                "args"    .= args]
 
-instance Show Func where
-  show f =  let is = showInstrHelper (instrs f) in 
-                "Function name: " ++ (show $ name f) 
-            ++  "\n" 
-            ++  "Function type: " ++ (show $ funcType f) 
-            ++ "\n" 
-            ++ "Instructions: " ++ is
+instance FromJSON Arg where 
+  parseJSON = withObject "Arg" $ \v ->
+    Arg <$> v .: "name"
+        <*> v .: "type"
+
+instance ToJSON Arg where 
+  toJSON (Arg argName argType) = 
+    object $ [  "name" .= argName,
+                "type" .= argType
+             ]
+
 
 instance FromJSON Instr where
   parseJSON = withObject "Instr" $ \v -> 
@@ -123,10 +132,6 @@ instance ToJSON Instr where
              "value"  .= value,
              "type"   .= instrType
             ]
-
-showInstrHelper :: [Instr] -> String
-showInstrHelper (i:is) = "  " ++ show i ++ "\n" ++ showInstrHelper is
-showInstrHelper [] = ""
 
 instance FromJSON InstrVal where
   parseJSON (Number x) = return $ IntVal (coefficient x)
@@ -157,6 +162,7 @@ instance FromJSON Op where
     "ret" -> Ret
     "const" -> Const
     "print" -> Print
+    "id"    -> Id
 
 instance ToJSON Op where
   toJSON Add = "add"
@@ -177,3 +183,4 @@ instance ToJSON Op where
   toJSON Ret = "ret"
   toJSON Const = "const"
   toJSON Print = "print"
+  toJSON Id   = "id"
