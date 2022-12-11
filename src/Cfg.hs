@@ -32,11 +32,12 @@ terminators = [Jmp, Br, Ret]
 
 {-- getCfg 
     Compute a Cfg from a block map. --}
-getCfg :: Map T.Text Block -> Cfg
+getCfg :: [(T.Text, Block)] -> Cfg
 getCfg blockMap = 
-  let lst = Map.toList blockMap 
+  let lst = blockMap 
       emptyMap = Map.empty in
   getCfg' lst emptyMap
+
 
 {-- getCfg helper --}
 getCfg' :: [(T.Text, Block)] -> Cfg -> Cfg
@@ -58,20 +59,19 @@ getCfg' ((name, block):tl) cfg =
             (succ,_):_ -> let locs = Map.findWithDefault [] name cfg in
                               getCfg' tl (Map.insert name (locs <> [succ]) cfg)
 
-getBlockMap :: Blocks -> Map T.Text Block
+getBlockMap :: Blocks -> [(T.Text, Block)]
 getBlockMap blocks = 
-  let emptyMap = Map.empty in
-  getBlockMap' blocks emptyMap 0
+  let emptyMap = [] in
+  reverse $ getBlockMap' blocks emptyMap 0
 
 getBlockMap' [] map _ = map
 getBlockMap' (block:blocks) map nextId = 
   case label $ head block of
     Nothing ->  let id = T.pack $ show nextId in
-                let map' = Map.insert ("block" `mappend` id) block map in 
+                let map' = (("block" `mappend` id), block):map in 
                 getBlockMap' blocks map' (nextId+1) 
-    Just id ->  let map' = Map.insert id (tail block) map in
+    Just id ->  let map' = (id, (tail block)):map in
                 getBlockMap' blocks map' nextId
-
 
 formBlocks :: [Instr] -> Blocks
 formBlocks instrs = formBlocks' instrs [] [] 

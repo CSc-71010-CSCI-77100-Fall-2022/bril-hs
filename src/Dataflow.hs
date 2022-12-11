@@ -23,8 +23,8 @@ main = do
   let instrs' = instrs $ head $ funcs prog
   let blocks = formBlocks instrs'
   let blockMap = getBlockMap blocks
-  putStrLn $ show $ funcs prog
   let cfg = getCfg blockMap
+  putStrLn $ show cfg
   let e = encode $ Prog {funcs = 
       [Func { name = "main", 
               funcType = (Nothing), 

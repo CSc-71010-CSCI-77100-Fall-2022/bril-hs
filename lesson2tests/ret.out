@@ -1,3 +1,0 @@
-fromList [("block0",[]),("block1",[])]
-
-fromList [("block0",[Instr {op = Just Const, dest = Just "v", instrArgs = Nothing, funcIds = Nothing, labels = Nothing, label = Nothing, value = Just (IntVal 4)},Instr {op = Just Print, dest = Nothing, instrArgs = Just ["v"], funcIds = Nothing, labels = Nothing, label = Nothing, value = Nothing},Instr {op = Just Ret, dest = Nothing, instrArgs = Nothing, funcIds = Nothing, labels = Nothing, label = Nothing, value = Nothing}]),("block1",[Instr {op = Just Print, dest = Nothing, instrArgs = Just ["v"], funcIds = Nothing, labels = Nothing, label = Nothing, value = Nothing}])]
