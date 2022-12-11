@@ -1,7 +1,7 @@
 @main {
   a: int = const 47;
   cond: bool = const true;
-  br cond .left .right;
+  v0: int = id op1;
 .left:
   a: int = const 1;
   jmp .end;

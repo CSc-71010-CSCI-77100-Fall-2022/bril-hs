@@ -10,7 +10,7 @@ stripNulls xs = Prelude.filter (\(_,v) -> v /= Null) xs
 
 {-- BRIL Program Types --}
 newtype Prog = Prog
-  { funcs :: [Func] }
+  { funcs :: [Func] } deriving (Eq, Show)
 
 data Type = 
     IntType 
@@ -22,7 +22,7 @@ data Func = Func
   , funcType    ::  Maybe Type
   , instrs      ::  [Instr]
   , args        ::  Maybe [Arg]
-  } 
+  } deriving (Eq, Show)
 
 data Arg = Arg
   { argName   ::  Text

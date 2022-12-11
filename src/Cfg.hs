@@ -46,9 +46,9 @@ getCfg' ((name, block):tl) cfg =
   case op lastInstr  of
     c
       | c `elem` [Just Jmp, Just Br] -> 
-          let Just keys = labels lastInstr 
-              locs = Map.findWithDefault [] name cfg in
-              getCfg' tl (Map.insert name (locs <> keys) cfg)
+          let Just keys = labels lastInstr in
+          let locs = Map.findWithDefault [] name cfg in
+            getCfg' tl (Map.insert name (locs <> keys) cfg)
 
       | c == Just Ret ->
           getCfg' tl (Map.insert name [] cfg)
@@ -98,5 +98,5 @@ formBlocks' (instr:instrs) blocks curBlock =
   else
     let newBlocks = if    curBlock == []
                     then  blocks
-                    else  curBlock:blocks in
+                    else  (reverse curBlock):blocks in
     formBlocks' instrs newBlocks [instr]
