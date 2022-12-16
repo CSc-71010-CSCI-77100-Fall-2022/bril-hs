@@ -59,6 +59,9 @@ getCfg' ((name, block):tl) cfg =
             (succ,_):_ -> let locs = Map.findWithDefault [] name cfg in
                               getCfg' tl (Map.insert name (locs <> [succ]) cfg)
 
+-- Assign a name to each block
+-- Name is either a label instruction, or
+-- a uniquely generated blockID.
 getBlockMap :: Blocks -> [(T.Text, Block)]
 getBlockMap blocks = 
   let emptyMap = [] in
@@ -73,6 +76,7 @@ getBlockMap' (block:blocks) map nextId =
     Just id ->  let map' = (id, (tail block)):map in
                 getBlockMap' blocks map' nextId
 
+-- Form basic blocks.
 formBlocks :: [Instr] -> Blocks
 formBlocks instrs = formBlocks' instrs [] [] 
 
