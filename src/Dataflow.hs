@@ -69,9 +69,12 @@ main = do
   --putStrLn $ show $ Map.toList outB
 
   let worklist = Set.fromList $ map (\x -> fst x) blockMap
-  let preds = reverseCfg cfg
-  putStrLn $ show cfg
+  let preds' = reverseCfg cfg
+  -- Temporary hack (until reverseCfg is modified) to add in an empty list
+  -- predecessors for the entry block.
+  let preds = Map.insert entryID [] preds'
   putStrLn $ show preds
+  
   
 
   let e = encode $ Prog {funcs = 
