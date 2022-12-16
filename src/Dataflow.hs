@@ -65,9 +65,15 @@ main = do
   -- Define outB, a map from blocks to their respective "out" values.
   -- Out values for all the blocks starts off as an empty set of definitions.
   let outB = Map.fromList (map (\x -> (fst x, Set.empty::Set.Set Def)) blockMap)
-  putStrLn $ show $ Map.toList inB
+  --putStrLn $ show $ Map.toList inB
+  --putStrLn $ show $ Map.toList outB
 
+  let worklist = Set.fromList $ map (\x -> fst x) blockMap
+  let preds = reverseCfg cfg
+  putStrLn $ show cfg
+  putStrLn $ show preds
   
+
   let e = encode $ Prog {funcs = 
       [Func { name = "main", 
               funcType = (Nothing), 

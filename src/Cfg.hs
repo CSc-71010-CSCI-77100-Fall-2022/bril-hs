@@ -38,6 +38,23 @@ getCfg blockMap =
       emptyMap = Map.empty in
   getCfg' lst emptyMap
 
+{-- reverseCfg
+Reverse edge directions. --}
+-- todo: handle case with no predecessors (i.e., the entry block should
+-- have an empty list as its map of predecessors.
+reverseCfg :: Cfg -> Cfg
+reverseCfg cfg =  
+  let elems = Map.toList cfg in 
+  let outerFold (nodeID, succ) newCfg =
+        let innerFold succID revCfg =
+              if Map.member succID revCfg
+              then Map.adjust (++[nodeID]) succID revCfg
+              else Map.insert succID [nodeID] revCfg
+        in
+          foldr innerFold newCfg succ  
+  in
+    foldr outerFold Map.empty elems
+      
 
 {-- getCfg helper --}
 getCfg' :: [(T.Text, Block)] -> Cfg -> Cfg
