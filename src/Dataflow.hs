@@ -18,11 +18,11 @@ import Cfg
 import Data.Aeson (eitherDecode, encode)
 import qualified Data.ByteString.Lazy as BS
 import System.IO
-import qualified Data.Set as Set
+import qualified Data.Set as S
 import qualified Data.Text as T
 import Data.Map (Map)
 import Data.Maybe (fromMaybe)
-import qualified Data.Map as Map
+import qualified Data.Map as M
 
 -- Definition is a product type of
 -- Def (Variable defined * Name of block * Instr # within block).
@@ -34,6 +34,55 @@ data Def = Def T.Text T.Text Int deriving (Show, Ord)
 instance Eq Def where
   Def t1 t2 n1 == Def t3 t4 n2 = t1 == t3 && t2 == t4 && n1 == n2
 
+reachingDef :: M.Map T.Text (S.Set Def) ->
+               M.Map T.Text (S.Set Def) ->
+               Cfg ->
+               Cfg ->
+               S.Set T.Text ->
+               T.Text ->
+               
+               (M.Map T.Text (S.Set Def), M.Map T.Text (S.Set Def))
+reachingDef inB outB succs preds worklist entryID blockMap =
+  if S.null worklist
+  then
+    (inB, outB)
+  else
+    let basicBlock = S.elemAt 0 worklist
+        worklist' = S.delete basicBlock worklist
+        inB' = merge inB outB preds basicBlock entryID
+        (outB', changed) = transfer inB outB basicBlock in
+    if changed
+    then
+      let f succ worklist = S.insert succ worklist
+      in
+        let worklist = foldr f worklist'
+                       (maybe [] id (M.lookup basicBlock succs))
+        in
+          reachingDef inB' outB' succs preds worklist entryID 
+    else reachingDef inB' outB' succs preds worklist' entryID
+
+merge :: M.Map T.Text (S.Set Def) ->
+         M.Map T.Text (S.Set Def) ->
+         Cfg ->
+         T.Text ->
+         T.Text -> 
+         M.Map T.Text (S.Set Def)
+merge inB outB preds block entryID =
+  let f pred lst = (maybe S.empty id (M.lookup pred outB)):lst 
+      setList = foldr f [] (maybe [] id (M.lookup block preds)) in
+  if block == entryID
+  then
+    M.insert block
+    (S.unions $ (maybe S.empty id (M.lookup entryID inB)):setList) inB
+  else M.insert block (S.unions setList) inB
+  
+  
+transfer :: M.Map T.Text (S.Set Def) ->
+            M.Map T.Text (S.Set Def) ->
+            T.Text ->
+            (M.Map T.Text (S.Set Def), Bool)
+transfer inB outB block = 
+               
 main :: IO ()
 main = do
   s <- BS.hGetContents stdin
@@ -53,30 +102,26 @@ main = do
   let vars = fmap (argName <$>) args'
   let entryID = fst $ head blockMap
   let inEntry = case vars of 
-        Nothing -> Set.empty
-        Just vs -> Set.fromList (map (\x -> Def x entryID 0) vs)
+        Nothing -> S.empty
+        Just vs -> S.fromList (map (\x -> Def x entryID 0) vs)
 
   -- Define inB, a map from blocks to their respective "in" values in terms of
   -- the dataflow analysis.
   -- Initial value for the entry block is the computed init value above.
-  let inB' = Map.fromList (map (\x -> (fst x, Set.empty::Set.Set Def)) blockMap)
-  let inB = Map.insert entryID inEntry inB'
+  let inB' = M.fromList (map (\x -> (fst x, S.empty::S.Set Def)) blockMap)
+  let inB = M.insert entryID inEntry inB'
 
   -- Define outB, a map from blocks to their respective "out" values.
   -- Out values for all the blocks starts off as an empty set of definitions.
-  let outB = Map.fromList (map (\x -> (fst x, Set.empty::Set.Set Def)) blockMap)
+  let outB = M.fromList (map (\x -> (fst x, S.empty::S.Set Def)) blockMap)
   --putStrLn $ show $ Map.toList inB
   --putStrLn $ show $ Map.toList outB
 
-  let worklist = Set.fromList $ map (\x -> fst x) blockMap
+  let worklist = S.fromList $ map (\x -> fst x) blockMap
   let preds' = reverseCfg cfg
-  -- Temporary hack (until reverseCfg is modified) to add in an empty list
-  -- predecessors for the entry block.
-  let preds = Map.insert entryID [] preds'
-  putStrLn $ show preds
+  let preds = M.insert entryID [] preds'
+  let (inB', outB') = reachingDef inB outB cfg preds worklist entryID
   
-  
-
   let e = encode $ Prog {funcs = 
       [Func { name = "main", 
               funcType = (Nothing), 
