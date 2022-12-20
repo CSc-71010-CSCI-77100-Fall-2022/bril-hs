@@ -1,5 +1,6 @@
 {-# LANGUAGE OverloadedStrings #-}
 module Lesson3 where
+import Debug.Trace
 
 {--
 Artjom Plaunov
@@ -40,26 +41,27 @@ reachingDef :: M.Map T.Text (S.Set Def) ->
                Cfg ->
                S.Set T.Text ->
                T.Text ->
-               
+               [(T.Text, Block)] ->
                (M.Map T.Text (S.Set Def), M.Map T.Text (S.Set Def))
 reachingDef inB outB succs preds worklist entryID blockMap =
   if S.null worklist
   then
     (inB, outB)
   else
-    let basicBlock = S.elemAt 0 worklist
-        worklist' = S.delete basicBlock worklist
-        inB' = merge inB outB preds basicBlock entryID
-        (outB', changed) = transfer inB outB basicBlock in
-    if changed
-    then
-      let f succ worklist = S.insert succ worklist
-      in
-        let worklist = foldr f worklist'
-                       (maybe [] id (M.lookup basicBlock succs))
+    let blockID = S.elemAt 0 worklist
+        worklist' = S.delete blockID worklist
+        inB' = merge inB outB preds blockID entryID
+        block = (maybe [] id (M.lookup blockID (M.fromList blockMap)))
+        (outB', changed) = transfer inB' outB blockID block in
+      if changed 
+      then
+        let f succ wl = S.insert succ wl
         in
-          reachingDef inB' outB' succs preds worklist entryID 
-    else reachingDef inB' outB' succs preds worklist' entryID
+          let worklist'' = foldr f worklist'
+                            (maybe [] id (M.lookup blockID succs))
+          in
+            reachingDef inB' outB' succs preds worklist'' entryID blockMap
+      else reachingDef inB' outB' succs preds worklist' entryID blockMap
 
 merge :: M.Map T.Text (S.Set Def) ->
          M.Map T.Text (S.Set Def) ->
@@ -80,9 +82,44 @@ merge inB outB preds block entryID =
 transfer :: M.Map T.Text (S.Set Def) ->
             M.Map T.Text (S.Set Def) ->
             T.Text ->
+            Block ->
             (M.Map T.Text (S.Set Def), Bool)
-transfer inB outB block = 
-               
+transfer inB outB blockID block = 
+  let  inB' = (maybe S.empty id (M.lookup blockID inB)) 
+       outB' = localAnalysis inB' block S.empty S.empty blockID 1 in
+    if S.null (S.difference outB' (maybe S.empty id (M.lookup blockID outB)))
+    then (outB, False)
+    else (M.insert blockID outB' outB, True)
+      
+
+localAnalysis :: S.Set Def ->
+                 Block ->
+                 S.Set Def ->
+                 S.Set Def ->
+                 T.Text ->
+                 Int ->
+                 S.Set Def
+localAnalysis inB [] def kills blockID n =  S.union def (filterKills inB kills)
+localAnalysis inB (i:is) def kills blockID n =
+  let x = op i in
+    if x `elem` [Just Add, Just Mul, Just Sub, Just Div,
+                 Just Const, Just Id]
+    then 
+      let destVar = maybe "" id (dest i) 
+          d = Def (destVar) blockID n in
+        localAnalysis inB is (S.insert d def) (S.insert d kills) blockID (n+1)
+    else
+      localAnalysis inB is def kills blockID (n+1)
+
+
+filterKills :: S.Set Def ->
+               S.Set Def ->
+               S.Set Def
+filterKills inB kills =
+  let predicate (Def id1 _ _) (Def id2 _ _) = if id1 == id2 then False else True
+      origamiFold killDef inB' = S.filter (predicate killDef) inB' in
+    foldr origamiFold inB (S.toList kills)
+  
 main :: IO ()
 main = do
   s <- BS.hGetContents stdin
@@ -120,7 +157,9 @@ main = do
   let worklist = S.fromList $ map (\x -> fst x) blockMap
   let preds' = reverseCfg cfg
   let preds = M.insert entryID [] preds'
-  let (inB', outB') = reachingDef inB outB cfg preds worklist entryID
+  let (inB', outB') = reachingDef inB outB cfg preds worklist entryID blockMap
+  mapM (putStrLn . show) (M.toList inB')
+
   
   let e = encode $ Prog {funcs = 
       [Func { name = "main", 
