@@ -1,10 +1,9 @@
 {-# LANGUAGE OverloadedStrings #-}
-module Lesson3 where
-import Debug.Trace
+module ReachingDefinitions where
 
 {--
 Artjom Plaunov
-Dataflow.hs
+ReachingDefinition.hs
 
 Proof of concept for understanding dataflow analysis, before 
 building a generic framework.
@@ -103,7 +102,7 @@ localAnalysis inB [] def kills blockID n =  S.union def (filterKills inB kills)
 localAnalysis inB (i:is) def kills blockID n =
   let x = op i in
     if x `elem` [Just Add, Just Mul, Just Sub, Just Div,
-                 Just Const, Just Id]
+                 Just Const, Just Id, Just Eq]
     then 
       let destVar = maybe "" id (dest i) 
           d = Def (destVar) blockID n in
@@ -158,7 +157,7 @@ main = do
   let preds' = reverseCfg cfg
   let preds = M.insert entryID [] preds'
   let (inB', outB') = reachingDef inB outB cfg preds worklist entryID blockMap
-  mapM (putStrLn . show) (M.toList inB')
+  mapM (putStrLn . show) (M.toList outB')
 
   
   let e = encode $ Prog {funcs = 
