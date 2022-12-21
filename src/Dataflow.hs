@@ -1,17 +1,9 @@
 {-# LANGUAGE OverloadedStrings #-}
-module Lesson3 where
+module Dataflow where
 
 {--
 Artjom Plaunov
-ReachingDefinition.hs
-
-Proof of concept for understanding dataflow analysis, before 
-building a generic framework.
-
-This runs a reaching definitions analysis on a bril program, 
-and returns the analysis results as terminal output (can be used for 
-piping into other analysis/transformation tools).
---}
+Dataflow.hs --}
 
 import Bril
 import Cfg
@@ -34,34 +26,28 @@ data Def = Def T.Text T.Text Int deriving (Show, Ord)
 instance Eq Def where
   Def t1 t2 n1 == Def t3 t4 n2 = t1 == t3 && t2 == t4 && n1 == n2
 
-reachingDef :: M.Map T.Text (S.Set Def) ->
-               M.Map T.Text (S.Set Def) ->
-               Cfg ->
-               Cfg ->
-               S.Set T.Text ->
-               T.Text ->
-               [(T.Text, Block)] ->
-               (M.Map T.Text (S.Set Def), M.Map T.Text (S.Set Def))
-reachingDef inB outB succs preds worklist entryID blockMap =
+
+dataflow m t inMap outMap succs preds worklist entryID blockMap =
   if S.null worklist
   then
-    (inB, outB)
+    (inMap, outMap)
   else
     let blockID = S.elemAt 0 worklist
         worklist' = S.delete blockID worklist
-        inB' = merge inB outB preds blockID entryID
+        inMap' = m inMap outMap preds blockID entryID
         block = (maybe [] id (M.lookup blockID (M.fromList blockMap)))
-        (outB', changed) = transfer inB' outB blockID block in
-      if changed 
+        (outMap', changed) = t inMap' outMap blockID block in
+      if changed
       then
         let f succ wl = S.insert succ wl
         in
           let worklist'' = foldr f worklist'
-                            (maybe [] id (M.lookup blockID succs))
+                           (maybe [] id (M.lookup blockID succs))
           in
-            reachingDef inB' outB' succs preds worklist'' entryID blockMap
-      else reachingDef inB' outB' succs preds worklist' entryID blockMap
-
+            dataflow m t inMap' outMap' succs preds worklist'' entryID blockMap
+      else
+        dataflow m t inMap' outMap' succs preds worklist' entryID blockMap
+        
 merge :: M.Map T.Text (S.Set Def) ->
          M.Map T.Text (S.Set Def) ->
          Cfg ->
@@ -155,8 +141,9 @@ main = do
 
   let worklist = S.fromList $ map (\x -> fst x) blockMap
   let preds' = reverseCfg cfg
+  -- Update predecessors to include empty list for entry.
   let preds = M.insert entryID [] preds'
-  let (inB', outB') = reachingDef inB outB cfg preds worklist entryID blockMap
+  let (inB', outB') = dataflow merge transfer inB outB cfg preds worklist entryID blockMap
   mapM (putStrLn . show) (M.toList outB')
 
   
