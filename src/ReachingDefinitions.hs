@@ -157,9 +157,13 @@ main = do
   let preds' = reverseCfg cfg
   let preds = M.insert entryID [] preds'
   let (inB', outB') = reachingDef inB outB cfg preds worklist entryID blockMap
+  
+  putStrLn "IN DEFS:"
+  mapM (putStrLn . show) (M.toList inB')
+
+  putStrLn "OUT DEFS:"
   mapM (putStrLn . show) (M.toList outB')
 
-  
   let e = encode $ Prog {funcs = 
       [Func { name = "main", 
               funcType = (Nothing), 

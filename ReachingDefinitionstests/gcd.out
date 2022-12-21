@@ -1,0 +1,21 @@
+IN DEFS:
+("block0",fromList [Def "op1" "block0" 0,Def "op2" "block0" 0])
+("cmp.val",fromList [Def "op1" "block0" 0,Def "op2" "block0" 0,Def "v0" "block0" 2,Def "v0" "else.2" 1,Def "v1" "block0" 3,Def "v1" "if.2" 1,Def "v3" "else.1" 1,Def "v3" "if.1" 1,Def "v4" "loop.bound" 1,Def "vc0" "block0" 1])
+("else.1",fromList [Def "op1" "block0" 0,Def "op2" "block0" 0,Def "v0" "block0" 2,Def "v0" "else.2" 1,Def "v1" "block0" 3,Def "v1" "if.2" 1,Def "v3" "else.1" 1,Def "v3" "if.1" 1,Def "v4" "loop.bound" 1,Def "vc0" "block0" 1])
+("else.2",fromList [Def "op1" "block0" 0,Def "op2" "block0" 0,Def "v0" "block0" 2,Def "v0" "else.2" 1,Def "v1" "block0" 3,Def "v1" "if.2" 1,Def "v3" "else.1" 1,Def "v3" "if.1" 1,Def "v4" "loop.bound" 1,Def "vc0" "block0" 1])
+("if.1",fromList [Def "op1" "block0" 0,Def "op2" "block0" 0,Def "v0" "block0" 2,Def "v0" "else.2" 1,Def "v1" "block0" 3,Def "v1" "if.2" 1,Def "v3" "else.1" 1,Def "v3" "if.1" 1,Def "v4" "loop.bound" 1,Def "vc0" "block0" 1])
+("if.2",fromList [Def "op1" "block0" 0,Def "op2" "block0" 0,Def "v0" "block0" 2,Def "v0" "else.2" 1,Def "v1" "block0" 3,Def "v1" "if.2" 1,Def "v3" "else.1" 1,Def "v3" "if.1" 1,Def "v4" "loop.bound" 1,Def "vc0" "block0" 1])
+("loop.bound",fromList [Def "op1" "block0" 0,Def "op2" "block0" 0,Def "v0" "block0" 2,Def "v0" "else.2" 1,Def "v1" "block0" 3,Def "v1" "if.2" 1,Def "v3" "else.1" 1,Def "v3" "if.1" 1,Def "v4" "loop.bound" 1,Def "vc0" "block0" 1])
+("program.end",fromList [Def "op1" "block0" 0,Def "op2" "block0" 0,Def "v0" "block0" 2,Def "v0" "else.2" 1,Def "v1" "block0" 3,Def "v1" "if.2" 1,Def "v3" "else.1" 1,Def "v3" "if.1" 1,Def "v4" "loop.bound" 1,Def "vc0" "block0" 1])
+("update.val",fromList [Def "op1" "block0" 0,Def "op2" "block0" 0,Def "v0" "block0" 2,Def "v0" "else.2" 1,Def "v1" "block0" 3,Def "v1" "if.2" 1,Def "v3" "else.1" 1,Def "v3" "if.1" 1,Def "v4" "loop.bound" 1,Def "vc0" "block0" 1])
+OUT DEFS:
+("block0",fromList [Def "op1" "block0" 0,Def "op2" "block0" 0,Def "v0" "block0" 2,Def "v1" "block0" 3,Def "vc0" "block0" 1])
+("cmp.val",fromList [Def "op1" "block0" 0,Def "op2" "block0" 0,Def "v0" "block0" 2,Def "v0" "else.2" 1,Def "v1" "block0" 3,Def "v1" "if.2" 1,Def "v3" "else.1" 1,Def "v3" "if.1" 1,Def "v4" "loop.bound" 1,Def "vc0" "block0" 1])
+("else.1",fromList [Def "op1" "block0" 0,Def "op2" "block0" 0,Def "v0" "block0" 2,Def "v0" "else.2" 1,Def "v1" "block0" 3,Def "v1" "if.2" 1,Def "v3" "else.1" 1,Def "v4" "loop.bound" 1,Def "vc0" "block0" 1])
+("else.2",fromList [Def "op1" "block0" 0,Def "op2" "block0" 0,Def "v0" "else.2" 1,Def "v1" "block0" 3,Def "v1" "if.2" 1,Def "v3" "else.1" 1,Def "v3" "if.1" 1,Def "v4" "loop.bound" 1,Def "vc0" "block0" 1])
+("if.1",fromList [Def "op1" "block0" 0,Def "op2" "block0" 0,Def "v0" "block0" 2,Def "v0" "else.2" 1,Def "v1" "block0" 3,Def "v1" "if.2" 1,Def "v3" "if.1" 1,Def "v4" "loop.bound" 1,Def "vc0" "block0" 1])
+("if.2",fromList [Def "op1" "block0" 0,Def "op2" "block0" 0,Def "v0" "block0" 2,Def "v0" "else.2" 1,Def "v1" "if.2" 1,Def "v3" "else.1" 1,Def "v3" "if.1" 1,Def "v4" "loop.bound" 1,Def "vc0" "block0" 1])
+("loop.bound",fromList [Def "op1" "block0" 0,Def "op2" "block0" 0,Def "v0" "block0" 2,Def "v0" "else.2" 1,Def "v1" "block0" 3,Def "v1" "if.2" 1,Def "v3" "else.1" 1,Def "v3" "if.1" 1,Def "v4" "loop.bound" 1,Def "vc0" "block0" 1])
+("program.end",fromList [Def "op1" "block0" 0,Def "op2" "block0" 0,Def "v0" "block0" 2,Def "v0" "else.2" 1,Def "v1" "block0" 3,Def "v1" "if.2" 1,Def "v3" "else.1" 1,Def "v3" "if.1" 1,Def "v4" "loop.bound" 1,Def "vc0" "block0" 1])
+("update.val",fromList [Def "op1" "block0" 0,Def "op2" "block0" 0,Def "v0" "block0" 2,Def "v0" "else.2" 1,Def "v1" "block0" 3,Def "v1" "if.2" 1,Def "v3" "else.1" 1,Def "v3" "if.1" 1,Def "v4" "loop.bound" 1,Def "vc0" "block0" 1])
+

@@ -1,5 +1,5 @@
 {-# LANGUAGE OverloadedStrings #-}
-module Lesson2 where
+module Setup where
 
 import Bril
 import Cfg
